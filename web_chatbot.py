@@ -5,15 +5,17 @@ from gtts import gTTS
 import io
 
 # 1. Page Config
-st.set_page_config(page_title="YashProBot.ai - Tree Edition", page_icon="🌳", layout="wide")
+st.set_page_config(page_title="YashProBot.ai - Locked", page_icon="🔐", layout="wide")
 
-# Session State for History & Background
+# --- Session State for Login & History ---
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
 if 'messages' not in st.session_state:
     st.session_state.messages = []
 if 'current_bg' not in st.session_state:
     st.session_state.current_bg = "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d"
 
-# 20 High-Quality Tree & Nature Photos
+# 20 Tree Photos List
 tree_photos = [
     "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d", "https://images.unsplash.com/photo-1441974231531-c6227db76b6e",
     "https://images.unsplash.com/photo-1507502707541-f369a3b18502", "https://images.unsplash.com/photo-1473448912268-2022ce9509d8",
@@ -30,7 +32,7 @@ tree_photos = [
 def change_bg():
     st.session_state.current_bg = random.choice(tree_photos)
 
-# 2. Stylish CSS with Colorful Buttons
+# 2. CSS for Login & Main UI
 st.markdown(f"""
     <style>
     .stApp {{
@@ -39,109 +41,105 @@ st.markdown(f"""
         background-position: center;
         background-attachment: fixed;
     }}
-    
-    /* Neon Text Style */
+    /* Login Box Style */
+    .login-card {{
+        background-color: rgba(0, 0, 0, 0.8);
+        padding: 30px;
+        border-radius: 20px;
+        border: 2px solid #ff9933;
+        text-align: center;
+    }}
     h1, h2, h3, p, b, .stMarkdown {{
         color: white !important;
         text-shadow: 2px 2px 10px black;
     }}
-
-    /* Input Box Glassmorphism */
-    div.stTextInput > div > div > input {{
-        background-color: rgba(0, 0, 0, 0.7) !important;
-        color: #2ecc71 !important;
-        border: 2px solid #2ecc71 !important;
-        border-radius: 15px !important;
-        font-size: 18px;
-    }}
-
-    /* COLORFUL BUTTONS */
     .stButton>button {{
-        background: linear-gradient(45deg, #ff9933, #ff5e62) !important; /* Orange Gradient */
+        background: linear-gradient(45deg, #ff9933, #ff5e62) !important;
         color: white !important;
         border-radius: 20px !important;
-        border: none !important;
-        font-weight: bold !important;
-        box-shadow: 0 4px 15px rgba(255, 153, 51, 0.4);
-        transition: 0.3s;
+        width: 100%;
+        font-weight: bold;
     }}
-    
-    .stButton>button:hover {{
-        transform: scale(1.05);
-        box-shadow: 0 6px 20px rgba(255, 153, 51, 0.7);
-        border: 2px solid white !important;
-    }}
-
-    /* Chat Bubbles */
-    .chat-bubble {{
-        background-color: rgba(0, 0, 0, 0.6);
-        padding: 12px;
-        border-radius: 12px;
-        margin-bottom: 8px;
-        border-left: 5px solid #2ecc71;
-    }}
-    
-    [data-testid="stSidebar"] {{
-        background-color: rgba(0, 30, 0, 0.8) !important;
-        backdrop-filter: blur(10px);
+    div.stTextInput > div > div > input {{
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+        border-radius: 10px;
     }}
     </style>
     """, unsafe_allow_html=True)
 
-# 3. Sidebar (Your Details)
+# 3. LOGIN PAGE LOGIC
+if not st.session_state.logged_in:
+    st.title("🚩 Jai Shree Ram - Secure Portal")
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("<div class='login-card'>", unsafe_allow_html=True)
+        uname = st.text_input("Username", placeholder="e.g. Kanchney9B")
+        pword = st.text_input("Password", type="password", placeholder="Enter Secret Key")
+        
+        if st.button("Unlock AI Bot"):
+            # Check Credentials
+            if uname == "Kanchney9B" and pword == "Yash@2026":
+                st.session_state.logged_in = True
+                st.success("Access Granted! Jai Shree Ram.")
+                time.sleep(1)
+                st.rerun()
+            else:
+                st.error("Galti! Sahi Username ya Password dalein.")
+        st.markdown("</div>", unsafe_allow_html=True)
+    st.stop()
+
+# 4. MAIN APP (After Login)
 with st.sidebar:
     st.header("👑 Developer Profile")
-    st.write(f"**Name:** Kanchney Tiwari (Yash)")
-    st.write(f"**Father's Name:** Mr. Awadhesh Tiwari")
-    st.write(f"**Mother's Name:** Mrs. Lila Tiwari")
+    st.write(f"**Name:** Kanchney Tiwari")
+    st.write(f"**Father:** Mr. Awadhesh Tiwari")
+    st.write(f"**Mother:** Mrs. Lila Tiwari")
     st.write(f"**Class:** 9th 'B' | KV Salempur")
     st.markdown("---")
     lang = st.selectbox("🌐 Robot Language", ["Hinglish", "Hindi", "Bhojpuri", "English"])
     if st.button("🌲 Change Tree Look"):
         change_bg()
         st.rerun()
-    if st.button("🗑️ Reset All"):
-        st.session_state.messages = []
+    if st.button("🔓 Logout"):
+        st.session_state.logged_in = False
         st.rerun()
 
-# 4. Main Chat Interface
-st.title("🤖 YashProBot.ai - Tree Pro")
+st.title("🤖 YashProBot.ai - Online")
 
-# Show Chat History
+# History Display
 for msg in st.session_state.messages:
-    st.markdown(f"<div class='chat-bubble'><b>{msg['role']}:</b> {msg['content']}</div>", unsafe_allow_html=True)
+    role_icon = "👤" if msg['role'] == "Kanchney" else "🤖"
+    st.markdown(f"**{role_icon} {msg['role']}:** {msg['content']}")
 
 st.markdown("---")
 
-# 5. Pro Layout: Mike and Text box side-by-side
-col_input, col_btn = st.columns([5, 1])
-
-with col_input:
-    user_input = st.text_input("", placeholder="Yahan likhein...", label_visibility="collapsed", key="msg_box")
-
+# Input Section (Mike + Text)
+col_in, col_btn = st.columns([5, 1])
+with col_in:
+    user_q = st.text_input("", placeholder="Sawal puchiye...", label_visibility="collapsed", key="chat_input")
 with col_btn:
-    # Colored Button for Send/Mike
-    submit = st.button("🎙️ Send")
+    send_click = st.button("🎙️ Send")
 
-if submit and user_input:
-    st.session_state.messages.append({"role": "Kanchney", "content": user_input})
+if send_click and user_q:
+    st.session_state.messages.append({"role": "Kanchney", "content": user_q})
     
-    # Robot Logic based on Language
+    # Simple Robot Brain
     replies = {
-        "Hinglish": f"Jai Shree Ram Kanchney! Main aapka robot '{user_input}' ka jawab de raha hoon.",
-        "Bhojpuri": f"Jai Shree Ram Kanchney! Raur prashna '{user_input}' bahut badhiya ba.",
-        "Hindi": f"Jai Shree Ram Kanchney! Aapka sawal vishleshan ke liye bhej diya gaya hai.",
-        "English": f"Jai Shree Ram Kanchney! Processing: '{user_input}'."
+        "Hinglish": f"Jai Shree Ram Kanchney! Main aapke sawal '{user_q}' par research kar raha hoon.",
+        "Bhojpuri": f"Jai Shree Ram Kanchney! Raur sawal '{user_q}' bahut badhiya ba, rukiye batavat tani.",
+        "Hindi": f"Jai Shree Ram Kanchney! Aapka prashna '{user_q}' bahut mahatvapurn hai.",
+        "English": f"Jai Shree Ram Kanchney! Analyzing your query: '{user_q}'."
     }
     
     bot_reply = replies[lang]
     st.session_state.messages.append({"role": "YashProBot", "content": bot_reply})
     
-    # Voice Output
+    # Audio Output
     tts = gTTS(text=bot_reply, lang='hi' if lang != "English" else 'en')
     audio_fp = io.BytesIO()
     tts.write_to_fp(audio_fp)
     st.audio(audio_fp, format='audio/mp3')
     
-    change_bg() # Automatically pick one of the 20 tree photos
+    change_bg()
     st.rerun()
