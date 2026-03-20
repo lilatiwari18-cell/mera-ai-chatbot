@@ -33,7 +33,7 @@ if not st.session_state['logged_in']:
 # 3. Sidebar with Personal Details
 with st.sidebar:
     st.header("👨‍💻 Developer Profile")
-    st.write("**Name:** Yash (Kanchan) Tiwari")
+    st.write("**Name:** Kanchney Tiwari (Yash)"
     st.write("**Class:** 9th 'B'")
     st.write("**School:** PM Shri KV Chero, Salempur")
     st.write("**Address:** Near St. Paul's School, Devpar, Salempur")
