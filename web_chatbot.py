@@ -1,19 +1,17 @@
 import streamlit as st
+import google.generativeai as genai
+from PIL import Image
 import random
 import time
 from gtts import gTTS
 import io
 
-# 1. Page Config (Mobile Friendly)
-st.set_page_config(page_title="YashProBot.ai - Free Access", page_icon="🌳", layout="wide")
+# ==========================================
+# 1. PAGE CONFIG & DESIGN (NEON NATURE)
+# ==========================================
+st.set_page_config(page_title="YashProBot.ai - Master", page_icon="🌳", layout="wide")
 
-# Session State for History & Background
-if 'messages' not in st.session_state:
-    st.session_state.messages = []
-if 'current_bg' not in st.session_state:
-    st.session_state.current_bg = "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d"
-
-# 20 High-Quality Tree & Nature Photos
+# 20 High-Quality Tree Photos
 tree_photos = [
     "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d", "https://images.unsplash.com/photo-1441974231531-c6227db76b6e",
     "https://images.unsplash.com/photo-1507502707541-f369a3b18502", "https://images.unsplash.com/photo-1473448912268-2022ce9509d8",
@@ -27,10 +25,15 @@ tree_photos = [
     "https://images.unsplash.com/photo-1421789665209-c9b2a435e3dc", "https://images.unsplash.com/photo-1433086966358-54859d0ed716"
 ]
 
+if 'current_bg' not in st.session_state:
+    st.session_state.current_bg = tree_photos[0]
+if 'chat_history' not in st.session_state:
+    st.session_state.chat_history = []
+
 def change_bg():
     st.session_state.current_bg = random.choice(tree_photos)
 
-# 2. Advanced CSS (No Password Required)
+# CSS for Glassmorphism and Glowing Buttons
 st.markdown(f"""
     <style>
     .stApp {{
@@ -39,91 +42,109 @@ st.markdown(f"""
         background-position: center;
         background-attachment: fixed;
     }}
-    
-    h1, h2, h3, p, b, .stMarkdown {{
-        color: white !important;
-        text-shadow: 2px 2px 10px black;
+    .main-box {{
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 20px;
+        border-radius: 25px;
+        border: 2px solid #2ecc71;
     }}
-
-    /* Chat Bubbles for History */
-    .chat-bubble {{
-        background-color: rgba(0, 0, 0, 0.6);
-        padding: 12px;
-        border-radius: 15px;
-        margin-bottom: 10px;
-        border-left: 5px solid #2ecc71;
-    }}
-
-    /* Colorful Buttons */
     .stButton>button {{
         background: linear-gradient(45deg, #ff9933, #ff5e62) !important;
         color: white !important;
         border-radius: 20px !important;
         font-weight: bold;
-        border: none;
+        box-shadow: 0 5px 15px rgba(255, 153, 51, 0.3);
     }}
-
-    /* Sidebar Background */
-    [data-testid="stSidebar"] {{
-        background-color: rgba(0, 30, 0, 0.85) !important;
-        backdrop-filter: blur(10px);
+    h1, h2, h3, p, b, .stMarkdown {{
+        color: white !important;
+        text-shadow: 2px 2px 5px black;
     }}
     </style>
     """, unsafe_allow_html=True)
 
-# 3. Sidebar (Profile & Language)
+# ==========================================
+# 2. AI BRAIN SETUP (Gemini)
+# ==========================================
+# Yahan apni API Key daalein (Ya Streamlit Secrets use karein)
+API_KEY = "AIzaSyBVXk7hPDoPIswSBE9ILskN7aIcND-k904" 
+genai.configure(api_key=API_KEY)
+model = genai.GenerativeModel('gemini-pro')
+
+def get_ai_response(prompt):
+    try:
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        return "Bhai, API Key check karo! Ya fir internet slow hai."
+
+# ==========================================
+# 3. SIDEBAR (DEVELOPER PROFILE)
+# ==========================================
 with st.sidebar:
+    st.image(f"https://api.dicebear.com/7.x/bottts/svg?seed={random.randint(1,99)}&backgroundColor=2ecc71", width=150)
     st.header("👑 Developer Profile")
-    st.write(f"**Name:** Yash (Kanchan) Tiwari")
-    st.write(f"**Father:** Mr. Awadhesh Tiwari")
-    st.write(f"**Mother:** Mrs. Lila Tiwari")
-    st.write(f"**Class:** 9th 'B' | KV Salempur")
+    st.info(f"""
+    **Name:** Yash (Kanchan) Tiwari  
+    **Father:** Mr. Awadhesh Tiwari  
+    **Mother:** Mrs. Lila Tiwari  
+    **Class:** 9th 'B'  
+    **School:** PM Shri KV Chero, Salempur
+    """)
     st.markdown("---")
-    lang = st.selectbox("🌐 Language Changer", ["Hinglish", "Hindi", "Bhojpuri", "English"])
+    lang = st.selectbox("🌐 Robot Language", ["Hinglish", "Hindi", "Bhojpuri", "English"])
     if st.button("🌲 Change Tree Look"):
         change_bg()
         st.rerun()
-    if st.button("🗑️ Reset Chat"):
-        st.session_state.messages = []
+    if st.button("🗑️ Reset Chat History"):
+        st.session_state.chat_history = []
         st.rerun()
 
-# 4. Main Chat Logic
-st.title("🤖 YashProBot.ai")
+# ==========================================
+# 4. CHAT INTERFACE
+# ==========================================
+st.title("🤖 YashProBot.ai - The Master Bot")
+st.write("### Jai Shree Ram, Kanchney! Main taiyar hoon Class 1-12 ke sawalon ke liye.")
 
 # Display History
-for msg in st.session_state.messages:
-    st.markdown(f"<div class='chat-bubble'><b>{msg['role']}:</b> {msg['content']}</div>", unsafe_allow_html=True)
+for chat in st.session_state.chat_history:
+    role_icon = "👤" if chat['role'] == "user" else "🤖"
+    with st.chat_message(chat['role'], avatar=role_icon):
+        st.markdown(chat['content'])
 
+# Input Row
 st.markdown("---")
+c1, c2 = st.columns([6, 1])
 
-# 5. Pro Layout: Mike and Text box Side-by-Side
-col_in, col_btn = st.columns([5, 1])
+with c1:
+    user_input = st.text_input("", placeholder="Maths, Science ya Coding ka sawal puchiye...", label_visibility="collapsed")
+with c2:
+    send_btn = st.button("🎙️ Send")
 
-with col_in:
-    user_q = st.text_input("", placeholder="Class 1-12 ka koi bhi sawal puchiye...", label_visibility="collapsed", key="chat_input")
-
-with col_btn:
-    send_click = st.button("🎙️ Send")
-
-if send_click and user_q:
-    st.session_state.messages.append({"role": "Kanchney", "content": user_q})
+if send_btn and user_input:
+    # 1. Add user message
+    st.session_state.chat_history.append({"role": "user", "content": user_input})
     
-    # Robot Logic
-    replies = {
-        "Hinglish": f"Jai Shree Ram Kanchney! Main aapke sawal '{user_q}' par research kar raha hoon.",
-        "Bhojpuri": f"Jai Shree Ram Kanchney! Raur sawal '{user_q}' bahut badhiya ba, rukiye batavat tani.",
-        "Hindi": f"Jai Shree Ram Kanchney! Aapka prashna '{user_q}' vishleshan ke liye bhej diya gaya hai.",
-        "English": f"Jai Shree Ram Kanchney! Processing your query: '{user_q}'."
-    }
+    # 2. Get AI Brain Response
+    with st.spinner("YashProBot soch raha hai..."):
+        full_prompt = f"Imagine you are YashProBot, an AI made by Yash Tiwari from Class 9B. Answer this in {lang}: {user_input}"
+        answer = get_ai_response(full_prompt)
     
-    bot_reply = replies[lang]
-    st.session_state.messages.append({"role": "YashProBot", "content": bot_reply})
+    # 3. Add bot response
+    st.session_state.chat_history.append({"role": "assistant", "content": answer})
     
-    # Voice Output
-    tts = gTTS(text=bot_reply, lang='hi' if lang != "English" else 'en')
+    # 4. Generate Voice
+    tts = gTTS(text=answer[:200], lang='hi' if lang != "English" else 'en') # Limit to 200 chars for speed
     audio_fp = io.BytesIO()
     tts.write_to_fp(audio_fp)
     st.audio(audio_fp, format='audio/mp3')
     
-    change_bg() # Automatically change tree photo
+    # 5. Refresh
+    change_bg()
     st.rerun()
+
+# ==========================================
+# 5. EXTRA FEATURES (MATHS EXPERT)
+# ==========================================
+if st.checkbox("Show Quick Formulas (Class 9)"):
+    st.write("📐 **Heron's Formula:** Area = $\sqrt{s(s-a)(s-b)(s-c)}$")
+    st.write("🐍 **Pygame Init:** `pygame.init()`")
