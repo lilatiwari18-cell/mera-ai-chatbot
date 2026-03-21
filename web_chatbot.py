@@ -105,38 +105,3 @@ with st.sidebar:
     st.markdown("<div class='glass-card' style='padding:10px;'>👑 YASH TIWARI</div>", unsafe_allow_html=True)
     st.write("**Section:** 9-B | KV Salempur")
     st.metric("🏆 Your Score", st.session_state.score)
-    
-    st.markdown("---")
-    level_choice = st.selectbox("🧠 Brain Level", ["Medium ⚙️", "Thinking 🤔", "Pro 🔥"])
-    sub_choice = st.selectbox("📚 Select Subject", ["Maths Expert", "Science Lab", "SST & GK"])
-    
-    st.markdown("---")
-    st.success("🎤 Mike Status: Ready")
-    st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
-    
-    if st.button("🌲 Change Tree Background"):
-        st.session_state.bg = random.choice(bgs)
-        st.rerun()
-
-# ==========================================
-# 4. MAIN CHAT ENGINE & MIKE
-# ==========================================
-st.markdown("<div class='glass-card'><h1>🤖 YashProBot.ai</h1><p>The Ultimate Project by Yash Tiwari</p></div>", unsafe_allow_html=True)
-
-for m in st.session_state.chat:
-    b_type = "user-bubble" if m["role"] == "user" else "bot-bubble"
-    st.markdown(f"<div class='{b_type}'>{m['content']}</div>", unsafe_allow_html=True)
-
-# User Input Row
-col1, col2 = st.columns([5, 1])
-with col1:
-    user_input = st.chat_input("Level aur Subject chun kar sawal puchiye...")
-with col2:
-    if st.button("🎤 MIKE"):
-        st.toast("Listening... Speak now!")
-
-if user_input:
-    st.session_state.chat.append({"role": "user", "content": user_input})
-    
-    # Process
-    reply = get_response(user_input
