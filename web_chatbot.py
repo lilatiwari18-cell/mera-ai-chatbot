@@ -1,208 +1,145 @@
 import streamlit as st
-import google.generativeai as genai
-from PIL import Image
 import random
-import time
 from gtts import gTTS
 import io
 
 # ==========================================
-# 1. PAGE CONFIG & DESIGN (NEON NATURE)
+# 1. THE DESIGNER INTERFACE (PRO LOOK)
 # ==========================================
-st.set_page_config(page_title="YashProBot.ai - Ultra", page_icon="🌳", layout="wide")
+st.set_page_config(page_title="YashProBot.ai - Ultra Boss", page_icon="⚡", layout="wide")
 
-# 20 High-Quality Tree Photos
-tree_photos = [
-    "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d", "https://images.unsplash.com/photo-1441974231531-c6227db76b6e",
-    "https://images.unsplash.com/photo-1507502707541-f369a3b18502", "https://images.unsplash.com/photo-1473448912268-2022ce9509d8",
-    "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86", "https://images.unsplash.com/photo-1448375033490-4c1b413ed748",
-    "https://images.unsplash.com/photo-1425913397330-cf8af2ff40a1", "https://images.unsplash.com/photo-1502082553048-f009c37129b9",
-    "https://images.unsplash.com/photo-1476231682828-37e571bc172f", "https://images.unsplash.com/photo-1444492412393-5510b18122f2",
-    "https://images.unsplash.com/photo-1496715976403-7e36dc43f17b", "https://images.unsplash.com/photo-1501854140801-50d01674aa3e",
-    "https://images.unsplash.com/photo-1470770841072-f978cf4d019e", "https://images.unsplash.com/photo-1511497584788-876760111969",
-    "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d", "https://images.unsplash.com/photo-1469474968028-56623f02e42e",
-    "https://images.unsplash.com/photo-1472214103451-9374bd1c798e", "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc",
-    "https://images.unsplash.com/photo-1421789665209-c9b2a435e3dc", "https://images.unsplash.com/photo-1433086966358-54859d0ed716"
+# High-Res Nature Backgrounds
+bgs = [
+    "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d", # Dark Forest
+    "https://images.unsplash.com/photo-1502082553048-f009c37129b9", # Tree Canopy
+    "https://images.unsplash.com/photo-1441974231531-c6227db76b6e", # Sunlight Forest
+    "https://images.unsplash.com/photo-1473448912268-2022ce9509d8"  # Autumn Trees
 ]
 
-if 'current_bg' not in st.session_state:
-    st.session_state.current_bg = tree_photos[0]
-if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = []
+if 'bg' not in st.session_state: st.session_state.bg = bgs[0]
+if 'chat' not in st.session_state: st.session_state.chat = []
+if 'score' not in st.session_state: st.session_state.score = 0
 
-def change_bg():
-    st.session_state.current_bg = random.choice(tree_photos)
-
-# CSS for Glassmorphism, Glowing Buttons, & Profile Glowing
+# Neon Glassmorphism CSS
 st.markdown(f"""
     <style>
     .stApp {{
-        background-image: url('{st.session_state.current_bg}');
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
+        background-image: url('{st.session_state.bg}');
+        background-size: cover; background-position: center; background-attachment: fixed;
     }}
-    .dev-card {{
-        background: rgba(0, 0, 0, 0.7);
-        border: 2px solid #2ecc71;
-        border-radius: 15px;
-        padding: 10px;
-        box-shadow: 0 0 15px #2ecc71;
-        text-align: center;
+    .main-box {{
+        background: rgba(0, 0, 0, 0.8); border: 2px solid #00ffcc;
+        border-radius: 20px; padding: 25px; text-align: center;
+        box-shadow: 0 0 20px #00ffcc; color: white;
     }}
-    .stButton>button {{
-        background: linear-gradient(45deg, #ff9933, #ff5e62) !important;
-        color: white !important;
-        border-radius: 20px !important;
-        font-weight: bold;
-        box-shadow: 0 5px 15px rgba(255, 153, 51, 0.3);
-    }}
-    h1, h2, h3, p, b, .stMarkdown {{
-        color: white !important;
-        text-shadow: 2px 2px 5px black;
+    .chat-msg {{
+        background: rgba(255, 255, 255, 0.1); padding: 12px;
+        border-radius: 10px; margin: 10px 0; border-left: 4px solid #00ffcc;
     }}
     </style>
     """, unsafe_allow_html=True)
 
 # ==========================================
-# 2. AI BRAIN SETUP (Gemini)
+# 2. THE MEGA DATABASE (ALL SUBJECTS & LEVELS)
 # ==========================================
-# Yahan अपनी Free API Key डालना, वरना image generation fail होगा.
-API_KEY = "AIzaSyB2HzWiPt9BJ4_FgLB2nzJM6LtwzDCO-i0" 
-genai.configure(api_key=API_KEY)
-# We need two models: one for chat, one for image gen (e.g., Gemini 1.5 Pro can do both)
-try:
-    model_chat = genai.GenerativeModel('gemini-pro')
-except:
-    st.error("API Key missing! Google Gemini key, otherwise chatbot is basic.")
-    model_chat = None
+data = {
+    "Maths Expert": {
+        "Medium ⚙️": [
+            ("3x + 10 = 40. Find x.", "10"),
+            ("Area of rectangle (L=5, B=4)?", "20"),
+            ("Value of 2^5?", "32")
+        ],
+        "Thinking 🤔": [
+            ("Heron's Formula: s if a=6, b=8, c=10.", "12"),
+            ("Area of Triangle with sides 3, 4, 5.", "6"),
+            ("Sum of angles in a Quadrilateral?", "360")
+        ],
+        "Pro 🔥": [
+            ("If x + 1/x = 3, find x^2 + 1/x^2.", "7"),
+            ("Volume of Sphere with radius 3 (use 22/7)?", "113.14"),
+            ("Find x: (x-1)/2 = 5.", "11")
+        ]
+    },
+    "Science Lab": {
+        "Medium ⚙️": [("Powerhouse of Cell?", "mitochondria"), ("Formula of Salt?", "nacl")],
+        "Thinking 🤔": [("SI unit of Force?", "newton"), ("Acid in Lemon?", "citric")],
+        "Pro 🔥": [("Mass of Earth?", "6x10^24"), ("Discovery of Nucleus?", "rutherford")]
+    },
+    "SST & GK": {
+        "Medium ⚙️": [("Capital of India?", "delhi"), ("Who is PM?", "modi")],
+        "Thinking 🤔": [("Iron Man of India?", "patel"), ("First War of Independence?", "1857")],
+        "Pro 🔥": [("Article 370 was in?", "kashmir"), ("Largest Continent?", "asia")]
+    }
+}
 
-def get_ai_response(prompt):
-    if not model_chat: return "Basic brain: Need API Key for thinking!"
-    try:
-        response = model_chat.generate_content(prompt)
-        return response.text
-    except:
-        return "Thinking mode failed! API Key limit maybe."
+def get_answer(user_q, level, sub):
+    q = user_q.lower()
+    
+    # 1. Identity Check
+    if any(word in q for word in ["kaun", "who", "name"]):
+        return f"Mera naam YashProBot.ai hai! Mujhe Class 9-B ke software star Yash Tiwari ne banaya hai. Main {sub} ka expert hoon!"
 
-# --- IDEA: DUMMY IMAGE GEN (REPLACE WITH REAL GEN) ---
-def create_image_dummy(prompt):
-    # This function should call a model capable of generating images. 
-    # For now, we simulate image creation with nature photos.
-    # In real deploy, we would use something like Stable Diffusion API or an advanced model.
-    # To demonstrate `Pillow` use, we are manipulating a nature image.
-    try:
-        base_img = Image.open(requests.get(random.choice(tree_photos), stream=True).raw)
-        # We manipulate the image using `Pillow` (dummy manipulation)
-        base_img = base_img.convert('L').point(lambda x: 0 if x < 128 else 255, '1') # Black & White
-        return base_img
-    except:
-        return None
+    # 2. Quiz Logic
+    if any(word in q for word in ["quiz", "question", "sawal", "test"]):
+        subject_data = data.get(sub, data["SST & GK"])
+        level_data = subject_data.get(level, subject_data["Medium ⚙️"])
+        ques, ans = random.choice(level_data)
+        st.session_state.last_ans = ans
+        return f"🌟 QUIZ TIME! 🌟\nQuestion: {ques}\n(Tip: Type the answer to get +10 points!)"
+
+    # 3. Answering Logic (Checking last quiz)
+    if 'last_ans' in st.session_state and st.session_state.last_ans.lower() in q:
+        st.session_state.score += 10
+        del st.session_state.last_ans
+        return "🎉 SAHI JAWAB! Yash Tiwari proud of you. Aapko mile +10 Points!"
+
+    # 4. Feature Check
+    if "kya kar sakte ho" in q:
+        return "Main Maths solve kar sakta hoon, Quiz le sakta hoon, Voice message bhej sakta hoon aur High-speed bina API ke chalta hoon!"
+
+    return "Jai Shree Ram! Aapka sawal accha hai, par main abhi seekh raha hoon. Yash Tiwari se contact karein!"
 
 # ==========================================
-# 3. SIDEBAR (DEVELOPER PROFILE)
+# 3. SIDEBAR & SCOREBOARD
 # ==========================================
 with st.sidebar:
-    st.markdown("<div class='dev-card'>", unsafe_allow_html=True)
-    st.image(f"https://api.dicebear.com/7.x/bottts/svg?seed=Yash&backgroundColor=2ecc71", width=120)
-    st.header("👑 Yash Tiwari")
-    st.info("""
-    **Father:** Mr. Awadhesh Tiwari  
-    **Mother:** Mrs. Lila Tiwari  
-    **Class:** 9th 'B' | KV Salempur
-    """)
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div class='main-box' style='padding:10px;'>⚡ YASH-PRO-AI ⚡</div>", unsafe_allow_html=True)
+    st.metric("🏆 Your Score", st.session_state.score)
     
     st.markdown("---")
+    level = st.selectbox("🧠 Thinking Level", ["Medium ⚙️", "Thinking 🤔", "Pro 🔥"])
+    subject = st.selectbox("📚 Subject Select", ["Maths Expert", "Science Lab", "SST & GK", "English Grammar"])
     
-    # NEW FEATURE 1: SUBJECT MODE & THINKING LEVEL
-    mode = st.selectbox("📚 Study Modes", ["General Chat", "Maths Expert", "Python Coder", "Science Lab"])
-    think_level = st.selectbox("🧠 Thinking Levels", ["Pro Level 🔥 (Detailed)", "Thinking 🤔 (Step-by-Step)", "Medium ⚙️ (Quick)"])
+    st.markdown("---")
+    st.markdown("🎵 **Amplifier x Safari Mode**")
+    st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
     
-    lang = st.radio("🗣️ Language", ["Hinglish", "Hindi", "Bhojpuri", "English"])
-    
-    # NEW FEATURE 2: SAFARI MUSIC SWITCH
-    music_on = st.checkbox("🎵 Music (Amplifier x Safari)", value=True)
-    
-    if st.button("🌲 New Tree Look"):
-        change_bg()
-        st.rerun()
-    if st.button("🗑️ Reset Chat"):
-        st.session_state.chat_history = []
+    if st.button("🌲 Change Tree Background"):
+        st.session_state.bg = random.choice(bgs)
         st.rerun()
 
-# --- Music HTML ---
-if music_on:
-    # Amplifier/Safari dummy tune player. Use a real embed link if available.
-    music_html = """
-        <audio id="bg-music" autoplay loop>
-            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
-        </audio>
-        <script>
-            var audio = document.getElementById("bg-music");
-            audio.volume = 0.2; 
-        </script>
-    """
-    st.components.v1.html(music_html, height=0)
-
 # ==========================================
-# 4. CHAT INTERFACE & MASTER LOGIC
+# 4. MAIN CHAT ENGINE
 # ==========================================
-st.title("🤖 YashProBot.ai - Ultra Mode 🚀")
-st.write(f"### Jai Shree Ram, Yash Tiwari! Main taiyar hoon level: {think_level}")
+st.markdown("<div class='main-box'><h1>🤖 Welcome Friend!</h1><p>The Ultimate Bot by Yash Tiwari</p></div>", unsafe_allow_html=True)
 
-# Display History (Chat bubbles)
-for chat in st.session_state.chat_history:
-    role_icon = "👤" if chat['role'] == "user" else "🤖"
-    with st.chat_message(chat['role'], avatar=role_icon):
-        st.markdown(chat['content'])
-        # Display image if present
-        if 'generated_image' in chat:
-            st.image(chat['generated_image'], caption="AI Generated Image", width=300)
+for m in st.session_state.chat:
+    with st.container():
+        st.markdown(f"<div class='chat-msg'><b>{m['role']}:</b> {m['content']}</div>", unsafe_allow_html=True)
 
-# Input Row
-st.markdown("---")
-c1, c2 = st.columns([6, 1])
-with c1:
-    user_input = st.text_input("", placeholder=f"Ask anything in {mode} mode... try 'Create image of a robotic tree'", label_visibility="collapsed")
-with c2:
-    send_btn = st.button("🎙️ Send")
+u_input = st.chat_input("Type 'Give me a quiz' or talk to Yash's Bot...")
 
-# Master Logic (Yash's Masterpiece)
-if send_btn and user_input:
-    # 1. Add user message
-    st.session_state.chat_history.append({"role": "user", "content": user_input})
+if u_input:
+    st.session_state.chat.append({"role": "Yash Tiwari", "content": u_input})
     
-    # --- Idea: Image Gen Check ---
-    image_to_generate = None
-    if "create image" in user_input.lower() or "draw" in user_input.lower():
-        with st.spinner("YashProBot photo bana raha hai..."):
-            image_to_generate = create_image_dummy(user_input.split("image of ")[-1]) # Use split as dummy method
+    # Brain Processing
+    bot_reply = get_answer(u_input, level, subject)
+    st.session_state.chat.append({"role": "YashProBot", "content": bot_reply})
     
-    # 2. Get AI Chat Response based on think_level
-    with st.spinner("YashProBot soch raha hai..."):
-        full_prompt = f"""
-            Imagine you are YashProBot, an AI made by Yash Tiwari from Class 9B. 
-            Mode: {mode}. Thinking Level: {think_level}. 
-            Answer this question to Yash in {lang}: {user_input}.
-            If image generation was requested, start the answer by saying 'Okay Yash! Creating image...'
-        """
-        answer = get_ai_response(full_prompt)
+    # Voice Synthesis
+    tts = gTTS(text=bot_reply[:150], lang='hi')
+    af = io.BytesIO()
+    tts.write_to_fp(af)
+    st.audio(af, format='audio/mp3')
     
-    # 3. Prepare bot message structure
-    bot_message = {"role": "assistant", "content": answer}
-    if image_to_generate:
-        bot_message["generated_image"] = image_to_generate # Save image in history
-
-    # Add bot response to history
-    st.session_state.chat_history.append(bot_message)
-    
-    # 4. Generate Voice
-    tts = gTTS(text=answer[:200], lang='hi') # Limit to 200 chars for speed
-    audio_fp = io.BytesIO()
-    tts.write_to_fp(audio_fp)
-    st.audio(audio_fp, format='audio/mp3')
-    
-    # 5. Refresh
-    change_bg()
     st.rerun()
