@@ -4,9 +4,9 @@ from gtts import gTTS
 import io
 
 # ==========================================
-# 1. THE DESIGNER INTERFACE (NEON GLASS LOOK)
+# 1. UI & DESIGN (CLEAR NEON GLASS LOOK)
 # ==========================================
-st.set_page_config(page_title="YashProBot.ai - Ultra Design", page_icon="💎", layout="wide")
+st.set_page_config(page_title="YashProBot.ai - Final Boss", page_icon="💎", layout="wide")
 
 # High-Res Nature Backgrounds
 bgs = [
@@ -76,7 +76,7 @@ def get_mega_brain():
             "Pro 🔥": "Speed of light is 3x10^8 m/s. DNA is in Nucleus."
         },
         "SST & GK": {
-            "Medium ⚙️": "Modi is India's PM. Delhi is the Capital.",
+            "Medium ⚙️": "Narendra Modi is India's PM. Delhi is the Capital.",
             "Thinking 🤔": "Article 370 was in Kashmir. Patel is Iron Man.",
             "Pro 🔥": "India became Republic on 26 Jan 1950. Asia is largest."
         }
@@ -87,11 +87,11 @@ data = get_mega_brain()
 def get_response(q, level, sub):
     q = q.lower()
     if any(w in q for w in ["kaun", "who", "name"]):
-        return "Mera naam YashProBot.ai hai! Mujhe Yash Tiwari (9-B) ne banaya hai."
+        return "Mera naam YashProBot.ai hai! Mujhe Class 9-B ke software star Yash Tiwari ne banaya hai."
     
     subject_db = data.get(sub, data["SST & GK"])
     if any(w in q for w in ["batao", "tell", "what", "pucho", "info"]):
-        return f"💡 [{level}] {sub} Info: " + subject_db.get(level, "No data available.")
+        return f"💡 [{level}] {sub} Info: " + subject_db.get(level, "Seeking more data...")
 
     if any(w in q for w in ["quiz", "question", "sawal", "test"]):
         return f"🌟 {sub} ({level}) Quiz: Kya aap taiyar hain? Jawab likhein!"
@@ -103,10 +103,10 @@ def get_response(q, level, sub):
 # ==========================================
 with st.sidebar:
     st.markdown("<div class='glass-card' style='padding:10px;'>👑 YASH TIWARI</div>", unsafe_allow_html=True)
+    st.write("**Section:** 9-B | KV Salempur")
     st.metric("🏆 Your Score", st.session_state.score)
     
     st.markdown("---")
-    # Yahan thi galti, ab ye sahi hai:
     level_choice = st.selectbox("🧠 Brain Level", ["Medium ⚙️", "Thinking 🤔", "Pro 🔥"])
     sub_choice = st.selectbox("📚 Select Subject", ["Maths Expert", "Science Lab", "SST & GK"])
     
@@ -114,14 +114,14 @@ with st.sidebar:
     st.success("🎤 Mike Status: Ready")
     st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
     
-    if st.button("🌲 Change Background"):
+    if st.button("🌲 Change Tree Background"):
         st.session_state.bg = random.choice(bgs)
         st.rerun()
 
 # ==========================================
 # 4. MAIN CHAT ENGINE & MIKE
 # ==========================================
-st.markdown("<div class='glass-card'><h1>🤖 YashProBot.ai</h1><p>Class 9-B Software Project</p></div>", unsafe_allow_html=True)
+st.markdown("<div class='glass-card'><h1>🤖 YashProBot.ai</h1><p>The Ultimate Project by Yash Tiwari</p></div>", unsafe_allow_html=True)
 
 for m in st.session_state.chat:
     b_type = "user-bubble" if m["role"] == "user" else "bot-bubble"
@@ -139,12 +139,4 @@ if user_input:
     st.session_state.chat.append({"role": "user", "content": user_input})
     
     # Process
-    reply = get_response(user_input, level_choice, sub_choice)
-    st.session_state.chat.append({"role": "bot", "content": reply})
-    
-    # Auto-Talking Voice
-    try:
-        tts = gTTS(text=reply[:150], lang='hi')
-        af = io.BytesIO()
-        tts.write_to_fp(af)
-        st.audio(af, format='audio/
+    reply = get_response(user_input
