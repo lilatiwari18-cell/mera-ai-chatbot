@@ -4,18 +4,16 @@ import time
 from gtts import gTTS
 import io
 
-# 1. Page Config
-st.set_page_config(page_title="YashProBot.ai - Locked", page_icon="🔐", layout="wide")
+# 1. Page Config (Mobile Friendly)
+st.set_page_config(page_title="YashProBot.ai - Free Access", page_icon="🌳", layout="wide")
 
-# --- Session State for Login & History ---
-if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
+# Session State for History & Background
 if 'messages' not in st.session_state:
     st.session_state.messages = []
 if 'current_bg' not in st.session_state:
     st.session_state.current_bg = "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d"
 
-# 20 Tree Photos List
+# 20 High-Quality Tree & Nature Photos
 tree_photos = [
     "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d", "https://images.unsplash.com/photo-1441974231531-c6227db76b6e",
     "https://images.unsplash.com/photo-1507502707541-f369a3b18502", "https://images.unsplash.com/photo-1473448912268-2022ce9509d8",
@@ -32,7 +30,7 @@ tree_photos = [
 def change_bg():
     st.session_state.current_bg = random.choice(tree_photos)
 
-# 2. CSS for Login & Main UI
+# 2. Advanced CSS (No Password Required)
 st.markdown(f"""
     <style>
     .stApp {{
@@ -41,105 +39,91 @@ st.markdown(f"""
         background-position: center;
         background-attachment: fixed;
     }}
-    /* Login Box Style */
-    .login-card {{
-        background-color: rgba(0, 0, 0, 0.8);
-        padding: 30px;
-        border-radius: 20px;
-        border: 2px solid #ff9933;
-        text-align: center;
-    }}
+    
     h1, h2, h3, p, b, .stMarkdown {{
         color: white !important;
         text-shadow: 2px 2px 10px black;
     }}
+
+    /* Chat Bubbles for History */
+    .chat-bubble {{
+        background-color: rgba(0, 0, 0, 0.6);
+        padding: 12px;
+        border-radius: 15px;
+        margin-bottom: 10px;
+        border-left: 5px solid #2ecc71;
+    }}
+
+    /* Colorful Buttons */
     .stButton>button {{
         background: linear-gradient(45deg, #ff9933, #ff5e62) !important;
         color: white !important;
         border-radius: 20px !important;
-        width: 100%;
         font-weight: bold;
+        border: none;
     }}
-    div.stTextInput > div > div > input {{
-        background-color: rgba(255, 255, 255, 0.1) !important;
-        color: white !important;
-        border-radius: 10px;
+
+    /* Sidebar Background */
+    [data-testid="stSidebar"] {{
+        background-color: rgba(0, 30, 0, 0.85) !important;
+        backdrop-filter: blur(10px);
     }}
     </style>
     """, unsafe_allow_html=True)
 
-# 3. LOGIN PAGE LOGIC
-if not st.session_state.logged_in:
-    st.title("🚩 Jai Shree Ram - Secure Portal")
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown("<div class='login-card'>", unsafe_allow_html=True)
-        uname = st.text_input("Username", placeholder="e.g. Kanchney9B")
-        pword = st.text_input("Password", type="password", placeholder="Enter Secret Key")
-        
-        if st.button("Unlock AI Bot"):
-            # Check Credentials
-            if uname == "Kanchney9B" and pword == "Yash@2026":
-                st.session_state.logged_in = True
-                st.success("Access Granted! Jai Shree Ram.")
-                time.sleep(1)
-                st.rerun()
-            else:
-                st.error("Galti! Sahi Username ya Password dalein.")
-        st.markdown("</div>", unsafe_allow_html=True)
-    st.stop()
-
-# 4. MAIN APP (After Login)
+# 3. Sidebar (Profile & Language)
 with st.sidebar:
     st.header("👑 Developer Profile")
-    st.write(f"**Name:** Kanchney Tiwari")
+    st.write(f"**Name:** Yash (Kanchan) Tiwari")
     st.write(f"**Father:** Mr. Awadhesh Tiwari")
     st.write(f"**Mother:** Mrs. Lila Tiwari")
     st.write(f"**Class:** 9th 'B' | KV Salempur")
     st.markdown("---")
-    lang = st.selectbox("🌐 Robot Language", ["Hinglish", "Hindi", "Bhojpuri", "English"])
+    lang = st.selectbox("🌐 Language Changer", ["Hinglish", "Hindi", "Bhojpuri", "English"])
     if st.button("🌲 Change Tree Look"):
         change_bg()
         st.rerun()
-    if st.button("🔓 Logout"):
-        st.session_state.logged_in = False
+    if st.button("🗑️ Reset Chat"):
+        st.session_state.messages = []
         st.rerun()
 
-st.title("🤖 YashProBot.ai - Online")
+# 4. Main Chat Logic
+st.title("🤖 YashProBot.ai")
 
-# History Display
+# Display History
 for msg in st.session_state.messages:
-    role_icon = "👤" if msg['role'] == "Kanchney" else "🤖"
-    st.markdown(f"**{role_icon} {msg['role']}:** {msg['content']}")
+    st.markdown(f"<div class='chat-bubble'><b>{msg['role']}:</b> {msg['content']}</div>", unsafe_allow_html=True)
 
 st.markdown("---")
 
-# Input Section (Mike + Text)
+# 5. Pro Layout: Mike and Text box Side-by-Side
 col_in, col_btn = st.columns([5, 1])
+
 with col_in:
-    user_q = st.text_input("", placeholder="Sawal puchiye...", label_visibility="collapsed", key="chat_input")
+    user_q = st.text_input("", placeholder="Class 1-12 ka koi bhi sawal puchiye...", label_visibility="collapsed", key="chat_input")
+
 with col_btn:
     send_click = st.button("🎙️ Send")
 
 if send_click and user_q:
     st.session_state.messages.append({"role": "Kanchney", "content": user_q})
     
-    # Simple Robot Brain
+    # Robot Logic
     replies = {
         "Hinglish": f"Jai Shree Ram Kanchney! Main aapke sawal '{user_q}' par research kar raha hoon.",
         "Bhojpuri": f"Jai Shree Ram Kanchney! Raur sawal '{user_q}' bahut badhiya ba, rukiye batavat tani.",
-        "Hindi": f"Jai Shree Ram Kanchney! Aapka prashna '{user_q}' bahut mahatvapurn hai.",
-        "English": f"Jai Shree Ram Kanchney! Analyzing your query: '{user_q}'."
+        "Hindi": f"Jai Shree Ram Kanchney! Aapka prashna '{user_q}' vishleshan ke liye bhej diya gaya hai.",
+        "English": f"Jai Shree Ram Kanchney! Processing your query: '{user_q}'."
     }
     
     bot_reply = replies[lang]
     st.session_state.messages.append({"role": "YashProBot", "content": bot_reply})
     
-    # Audio Output
+    # Voice Output
     tts = gTTS(text=bot_reply, lang='hi' if lang != "English" else 'en')
     audio_fp = io.BytesIO()
     tts.write_to_fp(audio_fp)
     st.audio(audio_fp, format='audio/mp3')
     
-    change_bg()
+    change_bg() # Automatically change tree photo
     st.rerun()
