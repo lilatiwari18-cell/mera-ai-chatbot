@@ -4,104 +4,123 @@ from gtts import gTTS
 import io
 
 # ==========================================
-# 1. UI & DESIGN (CLEAR NEON GLASS LOOK)
+# 1. UI & DESIGN (CLEAR NEON TEXT)
 # ==========================================
-st.set_page_config(page_title="YashProBot.ai - Final Boss", page_icon="💎", layout="wide")
+st.set_page_config(page_title="YashProBot.ai - Ultra Max", page_icon="🎤", layout="wide")
 
-# High-Res Nature Backgrounds
 bgs = [
-    "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d", # Dark Forest
-    "https://images.unsplash.com/photo-1502082553048-f009c37129b9", # Canopy
-    "https://images.unsplash.com/photo-1441974231531-c6227db76b6e"  # Sunlight
+    "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d", 
+    "https://images.unsplash.com/photo-1502082553048-f009c37129b9"
 ]
 
 if 'bg' not in st.session_state: st.session_state.bg = bgs[0]
 if 'chat' not in st.session_state: st.session_state.chat = []
 if 'score' not in st.session_state: st.session_state.score = 0
 
-# Custom CSS for Design & Clear Text
 st.markdown(f"""
     <style>
     .stApp {{
         background-image: url('{st.session_state.bg}');
         background-size: cover; background-position: center; background-attachment: fixed;
     }}
-    .glass-card {{
-        background: rgba(0, 0, 0, 0.85); 
-        border: 2px solid #00ffcc;
-        border-radius: 25px; 
-        padding: 25px; 
-        text-align: center; 
-        color: white;
-        box-shadow: 0 0 30px rgba(0, 255, 204, 0.4);
-        margin-bottom: 20px;
+    .main-card {{
+        background: rgba(0, 0, 0, 0.85); border: 2px solid #00ffcc;
+        border-radius: 20px; padding: 20px; text-align: center; color: white;
+        box-shadow: 0 0 20px #00ffcc; margin-bottom: 20px;
     }}
-    .bot-bubble {{
-        background: linear-gradient(135deg, rgba(0,255,204,0.2), rgba(0,0,0,0.95));
-        color: #00ffcc !important; 
-        padding: 18px; 
-        border-radius: 15px 15px 15px 0px; 
-        border-left: 5px solid #00ffcc;
-        font-size: 1.1em; 
-        font-weight: bold;
-        margin-bottom: 15px;
-        box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+    .bot-msg {{
+        background: rgba(0, 0, 0, 0.95); color: #00ffcc !important; 
+        padding: 18px; border-radius: 15px; border-left: 5px solid #00ffcc;
+        font-size: 1.1em; font-weight: bold; text-shadow: 2px 2px 4px #000;
+        margin-bottom: 15px; box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
     }}
-    .user-bubble {{
-        background: rgba(255, 255, 255, 0.15); 
-        color: white !important; 
-        padding: 12px; 
-        border-radius: 15px 15px 0px 15px; 
-        text-align: right;
-        margin-bottom: 15px; 
-        font-weight: bold;
+    .user-msg {{
+        background: rgba(255, 255, 255, 0.15); color: white !important; 
+        padding: 12px; border-radius: 10px; text-align: right;
+        margin-bottom: 10px; font-weight: bold;
     }}
     </style>
     """, unsafe_allow_html=True)
 
 # ==========================================
-# 2. THE KNOWLEDGE ENGINE (LEVELS & SUBJECTS)
+# 2. MEGA BRAIN (SUBJECTS + LEVELS + QUIZ)
 # ==========================================
-@st.cache_data
-def get_mega_brain():
-    return {
-        "Maths Expert": {
-            "Medium ⚙️": "Circle Area = πr². Rectangle = L×B.",
-            "Thinking 🤔": "Heron's Formula: √[s(s-a)(s-b)(s-c)].",
-            "Pro 🔥": "If x+1/x=3, then x²+1/x²=7. Sphere Vol = 4/3πr³."
-        },
-        "Science Lab": {
-            "Medium ⚙️": "Cell is life's unit. Water formula is H2O.",
-            "Thinking 🤔": "Force F = m×a. Earth Gravity g = 9.8 m/s².",
-            "Pro 🔥": "Speed of light is 3x10^8 m/s. DNA is in Nucleus."
-        },
-        "SST & GK": {
-            "Medium ⚙️": "Narendra Modi is India's PM. Delhi is the Capital.",
-            "Thinking 🤔": "Article 370 was in Kashmir. Patel is Iron Man.",
-            "Pro 🔥": "India became Republic on 26 Jan 1950. Asia is largest."
-        }
+knowledge = {
+    "Maths Expert": {
+        "Medium ⚙️": "Square area is Side*Side. Triangle sum is 180°.",
+        "Thinking 🤔": "Heron's Formula: Area = √[s(s-a)(s-b)(s-c)].",
+        "Pro 🔥": "If x+1/x=3, then x²+1/x² = 7. Volume of Sphere = 4/3πr³."
+    },
+    "Science Lab": {
+        "Medium ⚙️": "Cell is life's unit. Water is H2O.",
+        "Thinking 🤔": "Newton's 2nd Law: F = ma. Gravity on Earth is 9.8 m/s².",
+        "Pro 🔥": "Mitochondria has its own DNA. Speed of light is 3*10^8 m/s."
     }
+}
 
-data = get_mega_brain()
-
-def get_response(q, level, sub):
+def get_ultra_response(q, level, sub):
     q = q.lower()
+    # Identity
     if any(w in q for w in ["kaun", "who", "name"]):
-        return "Mera naam YashProBot.ai hai! Mujhe Class 9-B ke software star Yash Tiwari ne banaya hai."
+        return "Mera naam YashProBot.ai hai! Mujhe Yash Tiwari (Class 9-B) ne banaya hai."
     
-    subject_db = data.get(sub, data["SST & GK"])
-    if any(w in q for w in ["batao", "tell", "what", "pucho", "info"]):
-        return f"💡 [{level}] {sub} Info: " + subject_db.get(level, "Seeking more data...")
+    # Knowledge Search
+    for key, val in knowledge.get(sub, {}).items():
+        if level == key:
+            if "pucho" in q or "tell" in q or "batao" in q:
+                return f"[{level}] {sub} Knowledge: {val}"
 
-    if any(w in q for w in ["quiz", "question", "sawal", "test"]):
-        return f"🌟 {sub} ({level}) Quiz: Kya aap taiyar hain? Jawab likhein!"
+    # Default Quiz Logic
+    if "quiz" in q or "question" in q or "sawal" in q:
+        return f"Chaliye {sub} ka {level} test shuru karte hain! Kya aap taiyar hain?"
 
-    return f"Jai Shree Ram! Aapne {sub} mein {level} par '{q}' pucha. Yash Tiwari ka bot seekh raha hai!"
+    return f"Jai Shree Ram! Yash Tiwari ke bot ne suna: '{q}'. Main {sub} mein {level} par kaam kar raha hoon."
 
 # ==========================================
-# 3. SIDEBAR CONTROLS (LEVEL & SUBJECT)
+# 3. SIDEBAR (LEVEL & MIKE CONTROLS)
 # ==========================================
 with st.sidebar:
-    st.markdown("<div class='glass-card' style='padding:10px;'>👑 YASH TIWARI</div>", unsafe_allow_html=True)
-    st.write("**Section:** 9-B | KV Salempur")
-    st.metric("🏆 Your Score", st.session_state.score)
+    st.markdown("<div class='main-card'>👑 YASH TIWARI</div>", unsafe_allow_html=True)
+    st.metric("🏆 Score", st.session_state.score)
+    st.markdown("---")
+    
+    # LEVEL SELECTION (Wapas aa gaya!)
+    level_opt = st.selectbox("🧠 Level Change", ["Medium ⚙️", "Thinking 🤔", "Pro 🔥"])
+    sub_opt = st.selectbox("📚 Subject Select", ["Maths Expert", "Science Lab", "SST & GK"])
+    
+    st.markdown("---")
+    st.success("🎤 Mike: Active & Talking")
+    st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+    
+    if st.button("🌲 Change Background"):
+        st.session_state.bg = random.choice(bgs)
+        st.rerun()
+
+# ==========================================
+# 4. CHAT ENGINE (MIKE & VOICE)
+# ==========================================
+st.markdown("<div class='main-card'><h1>🤖 YashProBot.ai Ultra</h1><p>Level: "+level_opt+" | Subject: "+sub_opt+"</p></div>", unsafe_allow_html=True)
+
+for m in st.session_state.chat:
+    msg_style = "user-msg" if m["role"] == "user" else "bot-msg"
+    st.markdown(f"<div class='{msg_style}'>{m['content']}</div>", unsafe_allow_html=True)
+
+# User Input
+u_input = st.chat_input("Level aur Subject chun kar kuch bhi puchiye...")
+
+if u_input:
+    st.session_state.chat.append({"role": "user", "content": u_input})
+    
+    # Brain Processing with Level & Subject
+    ans = get_ultra_response(u_input, level_opt, sub_opt)
+    st.session_state.chat.append({"role": "bot", "content": ans})
+    
+    # MIKE / VOICE (Har answer ke baad auto-play)
+    try:
+        tts = gTTS(text=ans[:150], lang='hi')
+        af = io.BytesIO()
+        tts.write_to_fp(af)
+        st.audio(af, format='audio/mp3', autoplay=True)
+    except: pass
+    
+    st.rerun()
