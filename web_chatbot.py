@@ -19,7 +19,7 @@ if 'bg' not in st.session_state: st.session_state.bg = bgs[0]
 if 'chat' not in st.session_state: st.session_state.chat = []
 if 'score' not in st.session_state: st.session_state.score = 0
 
-# Neon Glassmorphism CSS for better visibility
+# Neon Glassmorphism CSS - Fixed Braces
 st.markdown(f"""
     <style>
     .stApp {{
@@ -30,7 +30,7 @@ st.markdown(f"""
         background: rgba(0, 0, 0, 0.85); border: 2px solid #00ffcc;
         border-radius: 20px; padding: 20px; text-align: center; color: white;
         box-shadow: 0 0 20px #00ffcc; margin-bottom: 20px;
-    {{
+    }}
     .bot-msg {{
         background: rgba(0, 0, 0, 0.9); color: #00ffcc !important; 
         padding: 15px; border-radius: 15px; border: 2px solid #00ffcc;
@@ -86,17 +86,69 @@ def get_answer(user_q, level, sub):
     if 'last_ans' in st.session_state and st.session_state.last_ans.lower() in q:
         st.session_state.score += 10
         del st.session_state.last_ans
-        return "🎉 SAHI JAWAB! Yash Tiwari is proud of you. Aapko mile +10 Points!"
+        return "🎉 SAHI JAWAB! Yash Tiwari proud of you. Aapko mile +10 Points!"
 
     if "kya kar sakte ho" in q:
         return "Main Maths solve kar sakta hoon, Quiz le sakta hoon, Voice message bhej sakta hoon aur Bina Net ke bhi chal sakta hoon!"
 
-    return f"Jai Shree Ram! Yash Tiwari ke bot ne aapka sawal '{user_q}' sun liya hai. Quiz khelne ke liye 'Quiz' likhein."
+    return f"Jai Shree Ram! Yash Tiwari ke bot ne aapka sawal sun liya hai. Quiz khelne ke liye 'Quiz' likhein."
 
 # ==========================================
 # 3. SIDEBAR (PROFILE, CONTROLS & MUSIC)
 # ==========================================
 with st.sidebar:
-    st.markdown("<div style='background:rgba(0,255,204,0.2); padding:10px; border-radius:10px; border:1px solid #00ffcc; text-align:center;'>👑 YASH TIWARI</div>", unsafe_allow_html=True)
+    st.markdown("<div style='background:rgba(0,255,204,0.2); padding:10px; border-radius:10px; border:1px solid #00ffcc; text-align:center; color:white;'>👑 YASH TIWARI</div>", unsafe_allow_html=True)
     st.write("Section: 9-B | KV Salempur")
-    st.
+    st.metric("🏆 Your Score", st.session_state.score)
+    
+    st.markdown("---")
+    level_choice = st.selectbox("🧠 Thinking Level", ["Medium ⚙️", "Thinking 🤔", "Pro 🔥"])
+    subject_choice = st.selectbox("📚 Subject Select", ["Maths Expert", "Science Lab", "SST & GK"])
+    
+    st.markdown("---")
+    st.success("🎤 Mike Status: Active")
+    st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+    
+    if st.button("🌲 Change Tree Background"):
+        st.session_state.bg = random.choice(bgs)
+        st.rerun()
+
+# ==========================================
+# 4. MAIN CHAT ENGINE & MIKE BUTTON
+# ==========================================
+st.markdown("<div class='welcome-box'><h1>🤖 Welcome Friend!</h1><p>The Ultimate Bot by Yash Tiwari</p></div>", unsafe_allow_html=True)
+
+# Display Chat History
+for m in st.session_state.chat:
+    if m["role"] == "user":
+        st.markdown(f"<div class='user-msg'>👤 You: {m['content']}</div>", unsafe_allow_html=True)
+    else:
+        st.markdown(f"<div class='bot-msg'>🤖 Bot: {m['content']}</div>", unsafe_allow_html=True)
+
+# Input Row
+col1, col2 = st.columns([5, 1])
+with col1:
+    u_input = st.chat_input("Type 'Quiz' or talk to Yash's Bot...")
+with col2:
+    if st.button("🎤 Mike"):
+        st.toast("Listening... (Mobile Mike Ready)")
+
+# Process Input
+if u_input:
+    st.session_state.chat.append({"role": "user", "content": u_input})
+    
+    # Corrected Function Call
+    bot_reply = get_answer(u_input, level_choice, subject_choice)
+    
+    st.session_state.chat.append({"role": "assistant", "content": bot_reply})
+    
+    # Voice Synthesis
+    try:
+        tts = gTTS(text=bot_reply[:150], lang='hi')
+        af = io.BytesIO()
+        tts.write_to_fp(af)
+        st.audio(af, format='audio/mp3')
+    except:
+        pass 
+    
+    st.rerun()
