@@ -4,70 +4,121 @@ from gtts import gTTS
 import io
 
 # ==========================================
-# 1. UI FIX (TEXT CLEARANCE & DESIGN)
+# 1. UI & DESIGN (CLEAR NEON TEXT)
 # ==========================================
-st.set_page_config(page_title="YashProBot.ai - Clear View", page_icon="🎤", layout="wide")
+st.set_page_config(page_title="YashProBot.ai - Final Boss", page_icon="⚡", layout="wide")
 
-# Background images
+# High-Res Tree Backgrounds
 bgs = [
-    "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d",
-    "https://images.unsplash.com/photo-1502082553048-f009c37129b9"
+    "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d", # Dark Forest
+    "https://images.unsplash.com/photo-1502082553048-f009c37129b9", # Tree Canopy
+    "https://images.unsplash.com/photo-1441974231531-c6227db76b6e"  # Sunlight Forest
 ]
 
 if 'bg' not in st.session_state: st.session_state.bg = bgs[0]
 if 'chat' not in st.session_state: st.session_state.chat = []
+if 'score' not in st.session_state: st.session_state.score = 0
 
-# CSS for Bold Text and Shadow
+# CSS for Clear Text and Neon Boxes
 st.markdown(f"""
     <style>
     .stApp {{
         background-image: url('{st.session_state.bg}');
         background-size: cover; background-position: center; background-attachment: fixed;
     }}
-    /* Answer Box: Isse text background se alag dikhega */
+    .welcome-box {{
+        background: rgba(0, 0, 0, 0.85); border: 2px solid #00ffcc;
+        border-radius: 20px; padding: 20px; text-align: center; color: white;
+        box-shadow: 0 0 20px #00ffcc; margin-bottom: 20px;
+    }}
     .bot-msg {{
-        background: rgba(0, 0, 0, 0.85); 
-        color: #00ffcc !important; 
-        padding: 20px; 
-        border-radius: 15px; 
-        border: 2px solid #00ffcc;
-        font-size: 1.2em;
-        font-weight: bold;
-        text-shadow: 2px 2px 4px #000000;
-        margin-bottom: 15px;
-        box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+        background: rgba(0, 0, 0, 0.9); color: #00ffcc !important; 
+        padding: 15px; border-radius: 15px; border: 2px solid #00ffcc;
+        font-size: 1.1em; font-weight: bold; text-shadow: 2px 2px 4px #000;
+        margin-bottom: 15px; box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
     }}
     .user-msg {{
-        background: rgba(255, 255, 255, 0.2); 
-        color: white !important; 
-        padding: 10px; 
-        border-radius: 10px;
-        text-align: right;
-        margin-bottom: 10px;
-        font-weight: bold;
+        background: rgba(255, 255, 255, 0.2); color: white !important; 
+        padding: 10px; border-radius: 10px; text-align: right;
+        margin-bottom: 10px; font-weight: bold; text-shadow: 1px 1px 2px #000;
     }}
     </style>
     """, unsafe_allow_html=True)
 
 # ==========================================
-# 2. SIDEBAR (PROFILE & MIKE SETTINGS)
+# 2. MEGA DATABASE (OFFLINE SECURE)
+# ==========================================
+@st.cache_data
+def get_database():
+    return {
+        "Maths Expert": {
+            "Medium ⚙️": [("3x + 10 = 40. Find x.", "10"), ("Area of rectangle (L=5, B=4)?", "20")],
+            "Thinking 🤔": [("Heron's Formula: s if a=6, b=8, c=10.", "12"), ("Root of 144?", "12")],
+            "Pro 🔥": [("If x + 1/x = 3, find x^2 + 1/x^2.", "7"), ("Volume of Sphere with radius 3 (use pi=3)?", "108")]
+        },
+        "Science Lab": {
+            "Medium ⚙️": [("Powerhouse of Cell?", "mitochondria"), ("Formula of Salt?", "nacl")],
+            "Thinking 🤔": [("SI unit of Force?", "newton"), ("Gas we breathe in?", "oxygen")],
+            "Pro 🔥": [("Mass of Earth?", "6x10^24"), ("Discovery of Nucleus?", "rutherford")]
+        },
+        "SST & GK": {
+            "Medium ⚙️": [("Capital of India?", "delhi"), ("Who is PM?", "modi")],
+            "Thinking 🤔": [("Iron Man of India?", "patel"), ("First War of Independence?", "1857")],
+            "Pro 🔥": [("Article 370 was in?", "kashmir"), ("Largest Continent?", "asia")]
+        }
+    }
+
+data = get_database()
+
+def get_answer(user_q, level, sub):
+    q = user_q.lower()
+    
+    if any(w in q for w in ["kaun", "who", "name"]):
+        return f"Mera naam YashProBot.ai hai! Mujhe Class 9-B ke software star Yash Tiwari ne banaya hai."
+
+    if any(w in q for w in ["quiz", "question", "sawal"]):
+        sub_data = data.get(sub, data["SST & GK"])
+        lvl_data = sub_data.get(level, sub_data["Medium ⚙️"])
+        ques, ans = random.choice(lvl_data)
+        st.session_state.last_ans = ans
+        return f"🌟 QUIZ TIME! 🌟\nQuestion: {ques}\n(Type answer for +10 points!)"
+
+    if 'last_ans' in st.session_state and st.session_state.last_ans.lower() in q:
+        st.session_state.score += 10
+        del st.session_state.last_ans
+        return "🎉 SAHI JAWAB! Yash Tiwari proud of you. Aapko mile +10 Points!"
+
+    if "kya kar sakte ho" in q:
+        return "Main Maths solve kar sakta hoon, Quiz le sakta hoon, Voice message bhej sakta hoon aur Bina Net ke bhi chal sakta hoon!"
+
+    return "Jai Shree Ram! Aapka sawal accha hai. Quiz khelne ke liye 'Quiz' likhein. Yash Tiwari se contact karein!"
+
+# ==========================================
+# 3. SIDEBAR (PROFILE, CONTROLS & MUSIC)
 # ==========================================
 with st.sidebar:
-    st.title("👑 Yash Tiwari")
+    st.markdown("<div class='welcome-box' style='padding:10px;'>👑 YASH TIWARI</div>", unsafe_allow_html=True)
     st.write("Section: 9-B | KV Salempur")
+    st.metric("🏆 Your Score", st.session_state.score)
+    
+    st.markdown("---")
+    level = st.selectbox("🧠 Thinking Level", ["Medium ⚙️", "Thinking 🤔", "Pro 🔥"])
+    subject = st.selectbox("📚 Subject Select", ["Maths Expert", "Science Lab", "SST & GK"])
+    
     st.markdown("---")
     st.success("🎤 Mike is Active")
-    st.info("Bina net ke bhi Quiz mode on hai!")
+    st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
     
-    if st.button("🌲 Change Tree Look"):
+    if st.button("🌲 Change Tree Background"):
         st.session_state.bg = random.choice(bgs)
         st.rerun()
 
 # ==========================================
-# 3. CHAT DISPLAY & MIKE BUTTON
+# 4. MAIN CHAT ENGINE & MIKE BUTTON
 # ==========================================
-st.markdown("<h1 style='color:white; text-align:center; text-shadow: 3px 3px 5px black;'>🤖 YashProBot.ai</h1>", unsafe_allow_html=True)
+st.markdown("<div class='welcome-box'><h1>🤖 Welcome Friend!</h1><p>The Ultimate Bot by Yash Tiwari</p></div>", unsafe_allow_html=True)
 
+# Display Chat
 for m in st.session_state.chat:
     if m["role"] == "user":
         st.markdown(f"<div class='user-msg'>👤 You: {m['content']}</div>", unsafe_allow_html=True)
@@ -77,36 +128,13 @@ for m in st.session_state.chat:
 # Input Row with Mike Simulation
 col1, col2 = st.columns([5, 1])
 with col1:
-    user_input = st.chat_input("Sawal puchiye, Yash Tiwari...")
+    u_input = st.chat_input("Type 'Quiz' or talk to Yash's Bot...")
 with col2:
-    if st.button("🎤"):
-        st.toast("Listening... (Mobile Browser Mike Active)")
-        # Real voice recognition requires browser-side JS, 
-        # but for school project, this button shows the feature!
+    if st.button("🎤 Mike"):
+        st.toast("Listening... (Speak to your Mobile)")
 
-# ==========================================
-# 4. BOT BRAIN (CLEAR ANSWERS)
-# ==========================================
-def get_reply(q):
-    q = q.lower()
-    if "name" in q:
-        return "Mera naam YashProBot.ai hai aur mujhe Yash Tiwari ne banaya hai!"
-    elif "math" in q or "quiz" in q:
-        return "Chaliye Class 9 Maths Quiz shuru karte hain! Heron's Formula kya hai?"
-    else:
-        return f"Jai Shree Ram! Yash Tiwari ke bot ne aapka sawal '{q}' sun liya hai."
-
-if user_input:
-    st.session_state.chat.append({"role": "user", "content": user_input})
+# Process Input
+if u_input:
+    st.session_state.chat.append({"role": "user", "content": u_input})
     
-    # Processing
-    reply = get_reply(user_input)
-    st.session_state.chat.append({"role": "assistant", "content": reply})
-    
-    # Voice Speak
-    tts = gTTS(text=reply[:100], lang='hi')
-    af = io.BytesIO()
-    tts.write_to_fp(af)
-    st.audio(af, format='audio/mp3')
-    
-    st.rerun()
+    bot_reply = get_answer(u_input,
