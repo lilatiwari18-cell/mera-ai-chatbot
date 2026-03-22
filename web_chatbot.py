@@ -1,68 +1,31 @@
 import streamlit as st
 from openai import OpenAI
-import os
-from dotenv import load_dotenv
-import speech_recognition as sr
-import pyttsx3
-import json
 
-# Load API key
-load_dotenv()
-client = OpenAI(api_key=os.getenv("sk-proj-MPGEcKdSKk4gsbzHDUczuyEQcn7deN85BZ00a3qNUEq-TZDGICfOCAffek4J2_6elaIe9VMjNFT3BlbkFJlh6YpnjV7qnXijIr73x_1CGqRZQ8VYDOZNkHyiMqTERcV16iu7o6TaADEmOdq3OJwHt88p0oUA"))
+# API key from Streamlit secrets
+client = OpenAI(api_key=st.secrets["sk-proj-MPGEcKdSKk4gsbzHDUczuyEQcn7deN85BZ00a3qNUEq-TZDGICfOCAffek4J2_6elaIe9VMjNFT3BlbkFJlh6YpnjV7qnXijIr73x_1CGqRZQ8VYDOZNkHyiMqTERcV16iu7o6TaADEmOdq3OJwHt88p0oUA"])
 
 # Page config
 st.set_page_config(page_title="Yash AI 🤖", layout="wide")
 
-# 🎨 Background style
+# 🎨 Natural background
 st.markdown("""
 <style>
 .stApp {
-    background: linear-gradient(135deg, #1f1c2c, #928dab);
-    color: white;
+    background: linear-gradient(120deg, #89f7fe, #66a6ff);
+    color: black;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# 🔐 LOGIN SYSTEM
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-
-username = st.text_input("Username")
-password = st.text_input("Password", type="password")
-
-if st.button("Login"):
-    if username == "yash" and password == "1234":
-        st.session_state.logged_in = True
-    else:
-        st.error("Wrong credentials")
-
-if not st.session_state.logged_in:
-    st.stop()
-
 # Title
-st.title("🤖 Yash AI Chatbot + Image Generator 🎨")
+st.title("🤖 Yash AI - Smart Study Chatbot")
 st.write("Made by **Yash Tiwari** 🚀")
 
-# 🎤 Voice Input
-def voice_input():
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.info("🎤 Speak now...")
-        audio = r.listen(source)
-    try:
-        return r.recognize_google(audio)
-    except:
-        return "Sorry, could not understand"
+# 🧠 Level selector
+level = st.selectbox("Select Answer Level 🧠", 
+                     ["Basic 😄", "Medium 🙂", "Pro 😎", "Thinking 🧠"])
 
-# 🔊 Voice Output
-def speak(text):
-    engine = pyttsx3.init()
-    engine.setProperty('rate', 170)
-    engine.setProperty('volume', 1.0)
-    engine.say(text)
-    engine.runAndWait()
-
-# Session memory
+# Chat memory
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -71,11 +34,8 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 🎤 Mic button
-if st.button("🎤 Speak"):
-    user_input = voice_input()
-else:
-    user_input = st.chat_input("Type your message...")
+# Input
+user_input = st.chat_input("Ask anything (Study / General / Image)...")
 
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
@@ -105,18 +65,30 @@ if user_input:
             })
 
     else:
-        # 🤖 Chatbot
+        # 🤖 Smart chatbot with levels
         with st.chat_message("assistant"):
+
+            system_prompt = f"""
+You are a friendly AI tutor for class 1 to 12 students.
+
+Rules:
+- Answer all subjects (Math, Science, English, etc.)
+- Be friendly and conversational (like a human friend)
+- If user asks casual questions (like "tum kya kar rahe ho"), reply naturally
+- Adjust explanation based on level:
+
+Basic: very simple, short
+Medium: clear with small explanation
+Pro: detailed explanation
+Thinking: deep explanation with logic and reasoning
+
+Give clean, correct answers.
+"""
+
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {
-                        "role": "system",
-                        "content": """
-You are a smart AI tutor for class 1 to 12 students.
-Explain answers in simple language.
-"""
-                    }
+                    {"role": "system", "content": system_prompt + f"\nLevel: {level}"}
                 ] + st.session_state.messages
             )
 
@@ -127,18 +99,3 @@ Explain answers in simple language.
                 "role": "assistant",
                 "content": reply
             })
-
-            # 🔊 Speak button
-            if st.button("🔊 Speak Reply"):
-                speak(reply)
-
-# 📄 Download chat
-if st.button("💾 Download Chat"):
-    chat_data = json.dumps(st.session_state.messages, indent=2)
-
-    st.download_button(
-        label="Download",
-        data=chat_data,
-        file_name="chat.json",
-        mime="application/json"
-    )
