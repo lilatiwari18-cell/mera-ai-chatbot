@@ -2,7 +2,7 @@ import streamlit as st
 from openai import OpenAI
 
 # API key from Streamlit secrets
-client = OpenAI(api_key=st.secrets[""])
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # Page config
 st.set_page_config(page_title="Yash AI 🤖", layout="wide")
