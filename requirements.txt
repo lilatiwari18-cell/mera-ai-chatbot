@@ -1,3 +1,4 @@
 streamlit
-openai
-python-dotenv
+customtkinter
+pyttsx3
+darkdetect
