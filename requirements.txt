@@ -1,4 +1,6 @@
 streamlit
-google-generativeai
-pillow
-gTTS
+openai
+python-dotenv
+speechrecognition
+pyaudio
+pyttsx3
