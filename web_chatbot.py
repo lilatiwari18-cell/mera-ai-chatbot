@@ -1,29 +1,71 @@
 import streamlit as st
-from openai import OpenAI
+import random
 
-# API key from Streamlit secrets
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
-# Page config
 st.set_page_config(page_title="Yash AI 🤖", layout="wide")
 
-# 🎨 Natural background
-st.markdown("""
+# 🌄 20 Background Images (free Unsplash links)
+backgrounds = [
+"https://images.unsplash.com/photo-1501785888041-af3ef285b470",
+"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+"https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+"https://images.unsplash.com/photo-1493244040629-496f6d136cc3",
+"https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+"https://images.unsplash.com/photo-1470770841072-f978cf4d019e",
+"https://images.unsplash.com/photo-1441974231531-c6227db76b6e",
+"https://images.unsplash.com/photo-1501785888041-af3ef285b470",
+"https://images.unsplash.com/photo-1500534314209-a25ddb2bd429",
+"https://images.unsplash.com/photo-1503264116251-35a269479413",
+"https://images.unsplash.com/photo-1504384308090-c894fdcc538d",
+"https://images.unsplash.com/photo-1519681393784-d120267933ba",
+"https://images.unsplash.com/photo-1491553895911-0055eca6402d",
+"https://images.unsplash.com/photo-1439066615861-d1af74d74000",
+"https://images.unsplash.com/photo-1502082553048-f009c37129b9",
+"https://images.unsplash.com/photo-1469474968028-56623f02e42e",
+"https://images.unsplash.com/photo-1500534623283-312aade485b7",
+"https://images.unsplash.com/photo-1501594907352-04cda38ebc29",
+"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+"https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
+]
+
+# 🎨 Background changer
+if "bg" not in st.session_state:
+    st.session_state.bg = random.choice(backgrounds)
+
+if st.button("🌄 Change Background"):
+    st.session_state.bg = random.choice(backgrounds)
+
+# 💎 Stylish CSS
+st.markdown(f"""
 <style>
-.stApp {
-    background: linear-gradient(120deg, #89f7fe, #66a6ff);
-    color: black;
-}
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins&display=swap');
+
+.stApp {{
+    background: url("{st.session_state.bg}");
+    background-size: cover;
+    background-position: center;
+}}
+
+h1, h2, h3 {{
+    font-family: 'Pacifico', cursive;
+    color: #ffffff;
+}}
+
+p, div {{
+    font-family: 'Poppins', sans-serif;
+    color: #ffffff;
+}}
+
+.chat-box {{
+    background: rgba(0,0,0,0.5);
+    padding: 15px;
+    border-radius: 15px;
+}}
 </style>
 """, unsafe_allow_html=True)
 
 # Title
-st.title("🤖 Yash AI - Smart Study Chatbot")
-st.write("Made by **Yash Tiwari** 🚀")
-
-# 🧠 Level selector
-level = st.selectbox("Select Answer Level 🧠", 
-                     ["Basic 😄", "Medium 🙂", "Pro 😎", "Thinking 🧠"])
+st.title("🤖 Yash AI Chatbot")
+st.write("✨ Made by Yash Tiwari")
 
 # Chat memory
 if "messages" not in st.session_state:
@@ -35,7 +77,16 @@ for msg in st.session_state.messages:
         st.write(msg["content"])
 
 # Input
-user_input = st.chat_input("Ask anything (Study / General / Image)...")
+user_input = st.chat_input("Type your message...")
+
+# Simple reply
+def reply_func(q):
+    if "hello" in q.lower():
+        return "Hello 👋! Kaise ho?"
+    elif "kaun ho" in q.lower():
+        return "Main Yash ka AI chatbot hoon 😎"
+    else:
+        return "Nice question 😄 main abhi simple version hoon."
 
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
@@ -43,59 +94,9 @@ if user_input:
     with st.chat_message("user"):
         st.write(user_input)
 
-    # 🎨 Image generation
-    if "image" in user_input.lower() or "draw" in user_input.lower():
-        with st.chat_message("assistant"):
-            st.write("🎨 Generating image...")
+    reply = reply_func(user_input)
 
-            img = client.images.generate(
-                model="gpt-image-1",
-                prompt=user_input,
-                size="512x512"
-            )
+    with st.chat_message("assistant"):
+        st.write(reply)
 
-            image_url = img.data[0].url
-            st.image(image_url)
-
-            reply = "Here is your image 🎨"
-
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": reply
-            })
-
-    else:
-        # 🤖 Smart chatbot with levels
-        with st.chat_message("assistant"):
-
-            system_prompt = f"""
-You are a friendly AI tutor for class 1 to 12 students.
-
-Rules:
-- Answer all subjects (Math, Science, English, etc.)
-- Be friendly and conversational (like a human friend)
-- If user asks casual questions (like "tum kya kar rahe ho"), reply naturally
-- Adjust explanation based on level:
-
-Basic: very simple, short
-Medium: clear with small explanation
-Pro: detailed explanation
-Thinking: deep explanation with logic and reasoning
-
-Give clean, correct answers.
-"""
-
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": system_prompt + f"\nLevel: {level}"}
-                ] + st.session_state.messages
-            )
-
-            reply = response.choices[0].message.content
-            st.write(reply)
-
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": reply
-            })
+    st.session_state.messages.append({"role": "assistant", "content": reply})
